@@ -246,88 +246,6 @@ def get_all_rooms(request):
     return Response(rooms)
 
 @api_view(['GET'])
-def get_all_reservations(request):
-    res = models.Reservations.objects.all().values()
-    return Response(res)
-
-@api_view(['GET'])
-def get_reservations_in_time_range(request):
-    # TODO rewrite this
-    """
-    Requires start_time, end_time in request body
-    """
-    body_unicode = request.body.decode('utf-8')
-    body = json.loads(body_unicode)
-    content = body['content']
-    print(f'{content=}')
-
-    dt_start=dt_end=None
-    try:
-        dt_start=datetime.strptime(start_time,"%Y-%m-%dT%H:%M:%S")
-        dt_end=datetime.strptime(end_time,"%Y-%m-%dT%H:%M:%S")
-    except:
-        raise ValueError("Invalid datetime format")
-    if dt_start>=dt_end:
-        raise ValueError("Start date & time must come before end date & time")
-    res=models.Reservations.objects.filter(
-        studentId__isnull=False,
-        date__gte=dt_start,
-        date__lte=dt_end,
-        startTime__gte=dt_start,
-        endTime__lte=dt_end,
-    ).values()
-    return Response(res)
-
-@api_view(['GET'])
-def get_reservations_for_student_in_time_range(request):
-    # TODO rewrite this
-    """
-    Requires student_id, start_time, end_time in request body
-    """
-    body_unicode = request.body.decode('utf-8')
-    body = json.loads(body_unicode)
-    content = body['content']
-    print(f'{content=}')
-
-    print(start_time)
-    dt_start=dt_end=None
-    try:
-        dt_start=datetime.strptime(start_time,"%Y-%m-%dT%H:%M:%S")
-        dt_end=datetime.strptime(end_time,"%Y-%m-%dT%H:%M:%S")
-    except:
-        raise ValueError("Invalid datetime format")
-    if dt_start>=dt_end:
-        raise ValueError("Start date & time must come before end date & time")
-    res=models.Reservations.objects.filter(
-        studentId=student_id,
-        date__gte=dt_start,
-        date__lte=dt_end,
-        startTime__gte=dt_start,
-        endTime__lte=dt_end,
-    ).values()
-    return Response(res)
-
-# get all reservations of a specific student 
-# sample url: http://localhost:8000/reservations/?studentId=123456
-@api_view(['GET'])
-def get_all_reservations_for_a_student(request):
-    """
-    Requires studentId in request body
-    """
-    body_unicode = request.body.decode('utf-8')
-    body = json.loads(body_unicode)
-    content = body['content']
-    print(f'{content=}')
-
-    reservations = models.Reservations.objects.filter(studentId=content['studentId'])
-    return Response(reservations)
-
-@api_view(['DELETE'])
-def clear_all_time_slots(request):
-    models.Reservations.objects.all().delete()
-    return Response()
-
-@api_view(['GET'])
 def get_available_rooms(request):
     """
     returns a QuerySet of rooms that are not booked within
@@ -361,7 +279,81 @@ def get_available_rooms(request):
         date=rsrvDate
     ).values_list('roomId', flat=True)
 
-
     available = models.Room.objects.all().exclude(roomId__in=unavailable)
 
     return Response(available)
+
+@api_view(['GET'])
+def get_reservations_for_student_in_time_range(request):
+    # TODO rewrite this
+    """
+    Requires student_id, start_time, end_time in request body
+    """
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    content = body['content']
+    print(f'{content=}')
+
+    print(start_time)
+    dt_start=dt_end=None
+    try:
+        dt_start=datetime.strptime(start_time,"%Y-%m-%dT%H:%M:%S")
+        dt_end=datetime.strptime(end_time,"%Y-%m-%dT%H:%M:%S")
+    except:
+        raise ValueError("Invalid datetime format")
+    if dt_start>=dt_end:
+        raise ValueError("Start date & time must come before end date & time")
+    res=models.Reservations.objects.filter(
+        studentId=student_id,
+        date__gte=dt_start,
+        date__lte=dt_end,
+        startTime__gte=dt_start,
+        endTime__lte=dt_end,
+    ).values()
+    return Response(res)
+
+@api_view(['GET'])
+def get_all_reservations_for_a_student(request):
+    """
+    Requires studentId in request body
+    """
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    content = body['content']
+    print(f'{content=}')
+
+    reservations = models.Reservations.objects.filter(studentId=content['studentId'])
+    return Response(reservations)
+
+@api_view(['GET'])
+def get_all_reservations(request):
+    res = models.Reservations.objects.all().values()
+    return Response(res)
+
+@api_view(['GET'])
+def get_reservations_in_time_range(request):
+    # TODO rewrite this
+    """
+    Requires start_time, end_time in request body
+    """
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    content = body['content']
+    print(f'{content=}')
+
+    dt_start=dt_end=None
+    try:
+        dt_start=datetime.strptime(start_time,"%Y-%m-%dT%H:%M:%S")
+        dt_end=datetime.strptime(end_time,"%Y-%m-%dT%H:%M:%S")
+    except:
+        raise ValueError("Invalid datetime format")
+    if dt_start>=dt_end:
+        raise ValueError("Start date & time must come before end date & time")
+    res=models.Reservations.objects.filter(
+        studentId__isnull=False,
+        date__gte=dt_start,
+        date__lte=dt_end,
+        startTime__gte=dt_start,
+        endTime__lte=dt_end,
+    ).values()
+    return Response(res)

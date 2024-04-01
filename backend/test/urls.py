@@ -18,16 +18,16 @@ from django.urls import path, include
 from . import views
 
 urlpatterns = [
-    path('checkRoomAvailability/<slug:roomId>/', views.check_room_availability),
-    path('createRoom/', views.create_room),
     path('createLibrary/', views.create_library),
+    path('createRoom/', views.create_room),
     path('createStudent/', views.create_student),
-    path('getAllRooms/', views.get_all_rooms),
-    path('getAllReservations/', views.get_all_reservations),
     path('createReservation/', views.create_reservation),
     path('deleteReservation/', views.delete_reservation),
-    path('clearAllTimeSlots/', views.clear_all_time_slots),
-    path('getReservationsInTimeRange/<str:start_time>/<str:end_time>/',views.get_reservations_in_time_range),
-    path('getReservationsForStudentInTimeRange/<str:student_id>/<str:start_time>/<str:end_time>/',views.get_reservations_for_student_in_time_range),
-    path('reservations/', views.get_all_reservations_for_a_student),
+    path('checkRoomAvailability/<slug:roomId>/', views.check_room_availability),
+    path('getAllRooms/', views.get_all_rooms),
+    path('getAvailableRooms/<str:start_time>/<str:end_time>/', views.get_available_rooms),
+    path('myReservationsTimeRange/<str:start_time>/<str:end_time>/',views.get_reservations_for_student_in_time_range),
+    path('myReservations/', views.get_all_reservations_for_a_student),
+    path('getAllReservations/', views.get_all_reservations),
+    path('getReservationsInTimeRange/',views.get_reservations_in_time_range),
 ]
