@@ -9,6 +9,8 @@ from .utils.fcns import *
 import datetime
 import random
 
+CURRENT_STUDENT_ID = 'abc1234'
+
 # Create your views here.
 
 @api_view(['POST'])
@@ -223,18 +225,10 @@ def delete_reservation(request):
     return Response()
 
 @api_view(['GET'])
-def check_room_availability(request):
-    """
-    Requires roomId in request body
-    """
-    body_unicode = request.body.decode('utf-8')
-    body = json.loads(body_unicode)
-    content = body['content']
-    print(f'{content=}')
-
+def check_room_availability(request, roomId):
     # TODO: use helper function for retrieving results (rewrite this)
     reservations = list(models.Reservations.objects
-                        .filter(roomId=content['roomId'], studentId=UNAVAILABLE)
+                        .filter(roomId=roomId, studentId=UNAVAILABLE)
                         .values('date', 'startTime', 'endTime'))
     
     resp = {'availableTimes': reservations}
@@ -246,35 +240,29 @@ def get_all_rooms(request):
     return Response(rooms)
 
 @api_view(['GET'])
-def get_available_rooms(request):
+def get_available_rooms(request, start_time, end_time):
     """
     returns a QuerySet of rooms that are not booked within
     a specified start and end time
-
-    Requires date, startHour, startMinute, endHour, endMinute in request body
-        !date must be formatted as year-month-day
+    
+    !date must be formatted as year-month-day
     """
-    body_unicode = request.body.decode('utf-8')
-    body = json.loads(body_unicode)
-    content = body['content']
-    print(f'{content=}')
-
-    startTime = datetime.time(content["startHour"], content["startMinute"])
-    endTime = datetime.time(content["endHour"], content["endMinute"])
+    start_time = datetime.strptime(start_time_str, "%H:%M").time()
+    end_time = datetime.strptime(end_time_str, "%H:%M").time()
 
     year, month, day = [int(x) for x in content['date'].split('-')]
     rsrvDate = datetime.date(year, month, day)
 
     """
     conditions checked to determine if a room is unavailable:
-      the reservation starts within [startTime, endTime]
-      the reservation ends within [startTime, endTime]
-      the reservations starts before startTime and ends after endTime
+      the reservation starts within [start_time, end_time]
+      the reservation ends within [start_time, end_time]
+      the reservations starts before start_time and ends after end_time
     """
     unavailable = models.Reservations.objects.filter(
-        Q(  Q(startTime__gte = startTime, startTime__lte = endTime) 
-            | Q(endTime__gte = startTime, endTime__lte = endTime)
-            | Q(startTime__lte = startTime, endTime__gte = endTime)
+        Q(  Q(startTime__gte = start_time, startTime__lte = end_time) 
+            | Q(endTime__gte = start_time, endTime__lte = end_time)
+            | Q(startTime__lte = start_time, endTime__gte = end_time)
         ),
         date=rsrvDate
     ).values_list('roomId', flat=True)
@@ -284,17 +272,8 @@ def get_available_rooms(request):
     return Response(available)
 
 @api_view(['GET'])
-def get_reservations_for_student_in_time_range(request):
+def get_reservations_for_student_in_time_range(request, start_time, end_time):
     # TODO rewrite this
-    """
-    Requires student_id, start_time, end_time in request body
-    """
-    body_unicode = request.body.decode('utf-8')
-    body = json.loads(body_unicode)
-    content = body['content']
-    print(f'{content=}')
-
-    print(start_time)
     dt_start=dt_end=None
     try:
         dt_start=datetime.strptime(start_time,"%Y-%m-%dT%H:%M:%S")
@@ -304,7 +283,7 @@ def get_reservations_for_student_in_time_range(request):
     if dt_start>=dt_end:
         raise ValueError("Start date & time must come before end date & time")
     res=models.Reservations.objects.filter(
-        studentId=student_id,
+        studentId=CURRENT_STUDENT_ID,
         date__gte=dt_start,
         date__lte=dt_end,
         startTime__gte=dt_start,
@@ -314,15 +293,7 @@ def get_reservations_for_student_in_time_range(request):
 
 @api_view(['GET'])
 def get_all_reservations_for_a_student(request):
-    """
-    Requires studentId in request body
-    """
-    body_unicode = request.body.decode('utf-8')
-    body = json.loads(body_unicode)
-    content = body['content']
-    print(f'{content=}')
-
-    reservations = models.Reservations.objects.filter(studentId=content['studentId'])
+    reservations = models.Reservations.objects.filter(studentId=CURRENT_STUDENT_ID)
     return Response(reservations)
 
 @api_view(['GET'])
