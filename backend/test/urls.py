@@ -20,7 +20,7 @@ from . import views
 urlpatterns = [
     path('createLibrary/', views.create_library),
     path('createRoom/', views.create_room),
-    path('createStudent/', views.create_student),
+    path('registerStudent/', views.register_student),
     path('createReservation/', views.create_reservation),
     path('deleteReservation/', views.delete_reservation),
     path('checkRoomAvailability/<slug:roomId>/', views.check_room_availability),

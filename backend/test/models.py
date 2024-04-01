@@ -1,6 +1,7 @@
 
 # Create your models here.
 from django.db import models
+from django.contrib.auth.hashers import make_password
 
 class Reservations(models.Model):
     reservationID = models.AutoField(primary_key=True)
@@ -14,6 +15,11 @@ class Student(models.Model):
     studentId = models.CharField(primary_key=True, max_length=10)
     email = models.EmailField(max_length=100)
     phone = models.CharField(max_length=10)
+    password = models.CharField(max_length=128)
+
+    def save(self, *args, **kwargs):
+        self.password = make_password(self.password)
+        super(Student, self).save(*args, **kwargs)
 
 class Library(models.Model):
     libraryName = models.CharField(primary_key=True, max_length=100)

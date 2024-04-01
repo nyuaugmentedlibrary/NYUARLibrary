@@ -63,9 +63,9 @@ def create_room(request):
     return Response()
 
 @api_view(['POST'])
-def create_student(request):
+def register_student(request):
     """
-    Requires studentId, email, phone in request body
+    Requires studentId, email, phone, password in request body
     """
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
@@ -75,7 +75,8 @@ def create_student(request):
     models.Student.objects.create(
         studentId=content["studentId"],
         email=content["email"],
-        phone=content["phone"]
+        phone=content["phone"],
+        password=content["password"]
     )
 
     return Response()
