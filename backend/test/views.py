@@ -329,3 +329,6 @@ def get_reservations_in_time_range(request):
         endTime__lte=dt_end,
     ).values()
     return Response(res)
+
+def clear_expired_time_slots(request):
+    pass

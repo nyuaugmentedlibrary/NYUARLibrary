@@ -30,4 +30,5 @@ urlpatterns = [
     path('myReservations/', views.get_all_reservations_for_a_student),
     path('getAllReservations/', views.get_all_reservations),
     path('getReservationsInTimeRange/',views.get_reservations_in_time_range),
+    path('clearExpiredTimeSlots',views.clear_expired_time_slots),
 ]
