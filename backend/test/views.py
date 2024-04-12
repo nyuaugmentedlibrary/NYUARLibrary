@@ -336,7 +336,8 @@ def clear_expired_time_slots(request):
     for res in allres:
         if res.endTime<currenttime:
             res.delete()
-    return Response(res)
+    #return Response(res)
 
 def get_available_times_for_room(request,library,room):
-    pass
+    matches=models.Reservations.objects.filter(libraryName=library,roomId=room)
+    return Response(matches)
