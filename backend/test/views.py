@@ -331,4 +331,12 @@ def get_reservations_in_time_range(request):
     return Response(res)
 
 def clear_expired_time_slots(request):
+    allres=models.Reservations.objects.all()
+    currenttime=datetime.now()
+    for res in allres:
+        if res.endTime<currenttime:
+            res.delete()
+    return Response(res)
+
+def get_available_times_for_room(request,library,room):
     pass
