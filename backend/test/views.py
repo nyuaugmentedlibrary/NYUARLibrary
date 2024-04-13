@@ -336,9 +336,8 @@ def available_times(request, roomId, date):
     returns the times that a room is available
     """
     open = []
-    closed = []
 
-    #
+    # parse date from parameter
     year, month, day = [int(x) for x in date.split('-')]
     date = datetime.date(year, month, day)
 
