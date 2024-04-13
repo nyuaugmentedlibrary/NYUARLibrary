@@ -329,3 +329,36 @@ def get_reservations_in_time_range(request):
         endTime__lte=dt_end,
     ).values()
     return Response(res)
+
+@api_view(['GET'])
+def available_times(request, roomId, date):
+    """
+    returns the times that a room is available
+    """
+    open = []
+    closed = []
+
+    #
+    year, month, day = [int(x) for x in date.split('-')]
+    date = datetime.date(year, month, day)
+
+    # get opening and closing time of room
+    my_room = models.Room.objects.get(pk=roomId)
+    open = [[my_room.openTime, my_room.closeTime]]
+
+    # get all reservations where room and date match
+    reservations = models.Reservations.objects.filter(
+        roomId = roomId,
+        date = date)
+
+    # remove closed times from the open times
+    for r in reservations:
+        temp = []
+        for open_l, open_r in open:
+            if open_l < r.startTime:
+                temp.append([open_l, min(open_r, r.startTime)])
+            if open_r > r.endTime:
+                temp.append([max(open_l, r.endTime), open_r])
+            open = temp
+    
+    return Response(open)
