@@ -21,6 +21,8 @@ urlpatterns = [
     path('createLibrary/', views.create_library),
     path('createRoom/', views.create_room),
     path('registerStudent/', views.register_student),
+    path('loginStudent/', views.login_student),
+    path('logoutStudent/', views.logout_student),
     path('createReservation/', views.create_reservation),
     path('deleteReservation/', views.delete_reservation),
     path('checkRoomAvailability/<slug:roomId>/', views.check_room_availability),

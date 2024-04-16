@@ -2,14 +2,13 @@ import json
 from django.shortcuts import render
 from django.db.utils import IntegrityError
 from django.db.models import Q
+from django.contrib.auth import authenticate
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from . import models
 from .utils.fcns import *
 import datetime
 import random
-
-CURRENT_STUDENT_ID = 'abc1234'
 
 # Create your views here.
 
@@ -79,6 +78,33 @@ def register_student(request):
         password=content["password"]
     )
 
+    return Response()
+
+@api_view(['POST'])
+def login_student(request):
+    """
+    Requires studentId, password in request body
+    """
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    content = body['content']
+    print(f'{content=}')
+
+    try:
+        student = models.Student.objects.get(pk=content['studentId'])
+        if not authenticate(student, password=content['password']):
+            raise ValueError("Incorrect password")
+    except models.Student.DoesNotExist as ex:
+        raise ex
+
+    # Set session with studentId
+    request.session['studentId'] = student.studentId
+    return Response()
+
+@api_view(['POST'])
+def logout_student(request):
+    if 'studentId' in request.session:
+        del request.session['studentId']
     return Response()
 
 @api_view(['POST'])
@@ -274,6 +300,8 @@ def get_available_rooms(request, start_time, end_time):
 
 @api_view(['GET'])
 def get_reservations_for_student_in_time_range(request, start_time, end_time):
+    if 'studentId' not in request.session:
+        raise ValueError("Not logged in")
     # TODO rewrite this
     dt_start=dt_end=None
     try:
@@ -284,7 +312,7 @@ def get_reservations_for_student_in_time_range(request, start_time, end_time):
     if dt_start>=dt_end:
         raise ValueError("Start date & time must come before end date & time")
     res=models.Reservations.objects.filter(
-        studentId=CURRENT_STUDENT_ID,
+        studentId=request.session['studentId'],
         date__gte=dt_start,
         date__lte=dt_end,
         startTime__gte=dt_start,
@@ -294,7 +322,9 @@ def get_reservations_for_student_in_time_range(request, start_time, end_time):
 
 @api_view(['GET'])
 def get_all_reservations_for_a_student(request):
-    reservations = models.Reservations.objects.filter(studentId=CURRENT_STUDENT_ID)
+    if 'studentId' not in request.session:
+        raise ValueError("Not logged in")
+    reservations = models.Reservations.objects.filter(studentId=request.session['studentId']).values()
     return Response(reservations)
 
 @api_view(['GET'])
@@ -343,7 +373,7 @@ def available_times(request, roomId, date):
 
     # get opening and closing time of room
     my_room = models.Room.objects.get(pk=roomId)
-    open = [[my_room.openTime, my_room.closeTime]]
+    open = [(my_room.openTime, my_room.closeTime)]
 
     # get all reservations where room and date match
     reservations = models.Reservations.objects.filter(
@@ -355,9 +385,9 @@ def available_times(request, roomId, date):
         temp = []
         for open_l, open_r in open:
             if open_l < r.startTime:
-                temp.append([open_l, min(open_r, r.startTime)])
+                temp.append((open_l, min(open_r, r.startTime)))
             if open_r > r.endTime:
-                temp.append([max(open_l, r.endTime), open_r])
+                temp.append((max(open_l, r.endTime), open_r))
             open = temp
     
     return Response(open)
