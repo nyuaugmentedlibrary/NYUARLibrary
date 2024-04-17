@@ -27,10 +27,12 @@ class ARLibTest(TestCase):
 
     def test_register_student(self):
         data = {
-            STUDENT_ID: TEST_STUDENTID,
-            EMAIL: TEST_EMAIL,
-            PHONE: TEST_PHONE,
-            PASSWORD: TEST_PASSWORD
+            "content" : {
+                STUDENT_ID: TEST_STUDENTID,
+                EMAIL: TEST_EMAIL,
+                PHONE: TEST_PHONE,
+                PASSWORD: TEST_PASSWORD
+            }
         }
 
         response = self.client.post(path=REGISTER, data=data, content_type='application/json')
