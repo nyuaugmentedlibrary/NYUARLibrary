@@ -1,10 +1,9 @@
 from django.test import TestCase, Client
 from django.db import connection
-from django.core.urlresolvers import reverse
 from . import models
 
 # Endpoints
-REGISTER = '/registerStudent/'
+REGISTER = '/test/registerStudent/'
 
 # Request Body Fields
 STUDENT_ID = 'studentId'
@@ -35,6 +34,5 @@ class ARLibTest(TestCase):
         }
 
         response = self.client.post(path=REGISTER, data=data)
-        print(response.content)
         self.assertEqual(response.status_code, 200)
         
