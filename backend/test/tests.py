@@ -21,7 +21,7 @@ class ARLibTest(TestCase):
     def setUp(self):
         self.client = Client()
 
-    def test_register_user(self):
+    def test_register_student(self):
         data = {
             STUDENT_ID: TEST_STUDENTID,
             EMAIL: TEST_EMAIL,
@@ -31,5 +31,10 @@ class ARLibTest(TestCase):
 
         self.client.post(path=REGISTER, data=data)
 
-        my_student = models.Student.objects.get(pk=TEST_STUDENTID)
-        self.assertTrue(my_student is not None)
+        try:
+            my_student = models.Student.objects.get(pk=TEST_STUDENTID)
+        except models.Student.DoesNotExist:
+            print("Student with ID {} does not exist in the database.".format(TEST_STUDENTID))
+            all_students = models.Student.objects.all()
+            print("All students in the database:", all_students)
+            raise
