@@ -1,0 +1,30 @@
+name: NYUARLibrary CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Running docker-compose build
+      run: docker-compose build 
+    
+    - name: Running docker-compose up
+      run: docker-compose up --detach
+    
+    - name: Wait for PostgreSQL service to become available
+      run: docker-compose exec -T db pg_isready -U postgres -h localhost -p 5432 -q
+
+    - name: Run Django migrate
+      run: docker-compose exec -T backend python manage.py migrate
+    
+    - name: Run Tests
+      run: docker compose exec -T backend python manage.py test test
