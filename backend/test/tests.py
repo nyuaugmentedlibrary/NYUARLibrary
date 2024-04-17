@@ -1,5 +1,6 @@
 from django.test import TestCase, Client
 from . import models
+from django.db import connection
 
 # Endpoints
 REGISTER = '/registerStudent/'
@@ -20,6 +21,9 @@ TEST_PASSWORD = 'password'
 class ARLibTest(TestCase):
     def setUp(self):
         self.client = Client()
+
+    def test_db_connection(self):
+        self.assertTrue(connection is not None)
 
     def test_register_student(self):
         data = {
