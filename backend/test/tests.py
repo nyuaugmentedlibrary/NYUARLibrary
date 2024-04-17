@@ -3,7 +3,7 @@ from . import models
 from django.db import connection
 
 # Endpoints
-REGISTER = '/registerStudent/'
+REGISTER = 'registerStudent/'
 
 # Request Body Fields
 STUDENT_ID = 'studentId'
