@@ -86,7 +86,7 @@ class ARLibTest(TestCase):
         response = self.client.post(path=CREATE_LIBRARY, 
                                     data=data, 
                                     content_type='application/json')
-        my_library = models.Library.objects.get(pk=LIBRARY_NAME)
+        my_library = models.Library.objects.get(pk=TEST_LBRY_NAME)
 
         self.assertEqual(response.status_code, 200)
         self.assertTrue(my_library is not None)
