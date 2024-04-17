@@ -21,7 +21,7 @@ class ARLibTest(TestCase):
     def setUp(self):
         self.client = Client()
 
-    def test_register_user(self, username, email, phone, password):
+    def test_register_user(self):
         data = {
             STUDENT_ID: TEST_STUDENTID,
             EMAIL: TEST_EMAIL,
