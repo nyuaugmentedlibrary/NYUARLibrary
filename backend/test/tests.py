@@ -33,6 +33,6 @@ class ARLibTest(TestCase):
             PASSWORD: TEST_PASSWORD
         }
 
-        response = self.client.post(path=REGISTER, data=data)
+        response = self.client.post(path=REGISTER, data=data, content_type='application/json')
         self.assertEqual(response.status_code, 200)
         
