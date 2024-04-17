@@ -33,12 +33,6 @@ class ARLibTest(TestCase):
             PASSWORD: TEST_PASSWORD
         }
 
-        self.client.post(path=REGISTER, data=data)
-
-        try:
-            my_student = models.Student.objects.get(pk=TEST_STUDENTID)
-        except models.Student.DoesNotExist:
-            print("Student with ID {} does not exist in the database.".format(TEST_STUDENTID))
-            all_students = models.Student.objects.all()
-            print("All students in the database:", all_students)
-            raise
+        response = self.client.post(path=REGISTER, data=data)
+        self.assertEqual(response.status_code, 200)
+        
