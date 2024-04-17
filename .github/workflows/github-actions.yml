@@ -19,3 +19,13 @@ jobs:
     
     - name: Running docker-compose up
       run: docker-compose up --detach
+    
+     # Wait for services to become available
+    - name: Wait for PostgreSQL service to become available
+      run: docker-compose exec -T db pg_isready -U postgres -h localhost -p 5432 -q
+
+      # Run migration commands inside the Django backend container
+    - name: Run Django makemigrations
+      run: docker-compose exec backend python manage.py makemigrations
+    - name: Run Django migrate
+      run: docker-compose exec backend python manage.py migrate
