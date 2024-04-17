@@ -26,6 +26,6 @@ jobs:
 
       # Run migration commands inside the Django backend container
     - name: Run Django makemigrations
-      run: docker-compose exec backend python manage.py makemigrations
+      run: docker-compose exec -T backend python manage.py makemigrations
     - name: Run Django migrate
-      run: docker-compose exec backend python manage.py migrate
+      run: docker-compose exec -T backend python manage.py migrate
