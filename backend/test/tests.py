@@ -36,5 +36,9 @@ class ARLibTest(TestCase):
         }
 
         response = self.client.post(path=REGISTER, data=data, content_type='application/json')
+        my_student = models.Student.objects.get(pk=TEST_STUDENTID)
+
         self.assertEqual(response.status_code, 200)
+        self.assertTrue(my_student is not None)
+        
         
