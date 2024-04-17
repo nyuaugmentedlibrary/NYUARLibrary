@@ -1,6 +1,7 @@
 from django.test import TestCase, Client
-from . import models
 from django.db import connection
+from django.urls import URLPattern, URLResolver, get_resolver
+from . import models
 
 # Endpoints
 REGISTER = '/registerStudent/'
@@ -24,6 +25,23 @@ class ARLibTest(TestCase):
 
     def test_db_connection(self):
         self.assertTrue(connection is not None)
+
+    def print_endpoints(self, urlpatterns, parent_pattern=None):
+        for pattern in urlpatterns:
+            if isinstance(pattern, URLResolver):
+                if parent_pattern is None:
+                    self.print_endpoints(pattern.url_patterns, pattern.pattern)
+                else:
+                    self.print_endpoints(pattern.url_patterns, parent_pattern)
+            elif isinstance(pattern, URLPattern):
+                if parent_pattern is not None:
+                    self.stdout.write(parent_pattern.regex.pattern + pattern.pattern.regex.pattern)
+                else:
+                    self.stdout.write(pattern.pattern.regex.pattern)
+
+    def test_print_endpoints(self):
+        resolver = get_resolver()
+        self.print_endpoints(resolver.url_patterns)
 
     def test_register_student(self):
         data = {
