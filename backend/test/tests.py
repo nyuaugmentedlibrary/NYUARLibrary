@@ -111,7 +111,7 @@ class ARLibTest(TestCase):
         response = self.client.post(path=CREATE_ROOM, 
                                     data=data, 
                                     content_type='application/json')
-        my_room = models.Room.objects.get(pk=ROOM_ID)
+        my_room = models.Room.objects.get(pk=TEST_ROOM_ID)
 
         self.assertEqual(response.status_code, 200)
         self.assertTrue(my_room is not None)
