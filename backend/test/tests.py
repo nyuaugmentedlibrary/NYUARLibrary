@@ -17,13 +17,12 @@ TEST_PHONE = '1010101010'
 TEST_PASSWORD = 'password'
 
 class ARLibTest(TestCase):
-    def setup(self):
+    def setUp(self):
         self.client = Client()
 
         self.register_user(TEST_STUDENTID, TEST_EMAIL, 
                            TEST_PHONE, TEST_PASSWORD)
 
-    
     def register_user(self, username, email, phone, password):
         data = {
             STUDENT_ID: TEST_STUDENTID,
