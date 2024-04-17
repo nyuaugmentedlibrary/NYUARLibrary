@@ -23,8 +23,8 @@ jobs:
     - name: Wait for PostgreSQL service to become available
       run: docker-compose exec -T db pg_isready -U postgres -h localhost -p 5432 -q
 
-    - name: Run Django migrate
+    - name: Running Django migrate
       run: docker-compose exec -T backend python manage.py migrate
     
-    - name: Run Tests
+    - name: Running Tests
       run: docker compose exec -T backend python manage.py test test
