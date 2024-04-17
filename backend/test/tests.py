@@ -9,6 +9,7 @@ CREATE_ROOM = '/test/createRoom/'
 
 # Request Body Fields
 CONTENT      = 'content'
+CONTENT_TYPE_JSON = 'application/json'
 STUDENT_ID   = 'studentId'
 EMAIL        = 'email'
 PHONE        = 'phone'
@@ -67,7 +68,7 @@ class ARLibTest(TestCase):
 
         response = self.client.post(path=REGISTER, 
                                     data=data, 
-                                    content_type='application/json')
+                                    content_type=CONTENT_TYPE_JSON)
         my_student = models.Student.objects.get(pk=TEST_STUDENTID)
 
         self.assertEqual(response.status_code, 200)
@@ -85,7 +86,7 @@ class ARLibTest(TestCase):
 
         response = self.client.post(path=CREATE_LIBRARY, 
                                     data=data, 
-                                    content_type='application/json')
+                                    content_type=CONTENT_TYPE_JSON)
         my_library = models.Library.objects.get(pk=TEST_LBRY_NAME)
 
         self.assertEqual(response.status_code, 200)
@@ -110,7 +111,7 @@ class ARLibTest(TestCase):
 
         response = self.client.post(path=CREATE_ROOM, 
                                     data=data, 
-                                    content_type='application/json')
+                                    content_type=CONTENT_TYPE_JSON)
         my_room = models.Room.objects.get(pk=TEST_ROOM_ID)
 
         self.assertEqual(response.status_code, 200)
