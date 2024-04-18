@@ -28,23 +28,11 @@ CLOSE_MINUTE = 'closeMinute'
 
 # Test Data
 TEST_STUDENTID = 'abc123'
-TEST_EMAIL = 'abc123@nyu.edu'
-TEST_PHONE = '1010101010'
 TEST_PASSWORD = 'password'
 
 TEST_LBRY_NAME = 'my library'
-TEST_LBRY_LOC = 'manhattan'
-TEST_LBRY_PHONE = '0101010101'
 
 TEST_ROOM_ID = 'EZ103'
-TEST_ROOM_TYPE = 'study'
-TEST_ROOM_MINCAP = 2
-TEST_ROOM_MAXCAP = 8
-TEST_ROOM_NOISELVL = 2
-TEST_ROOM_OPENHR = 8
-TEST_ROOM_OPENMIN = 0
-TEST_ROOM_CLOSEHR = 20
-TEST_ROOM_CLOSEMIN = 0
 
 
 class ARLibTest(TestCase):
@@ -57,11 +45,12 @@ class ARLibTest(TestCase):
 
 
     def register_student(self):
+        email = TEST_STUDENTID + '@nyu.edu'
         data = {
             CONTENT : {
                 STUDENT_ID: TEST_STUDENTID,
-                EMAIL: TEST_EMAIL,
-                PHONE: TEST_PHONE,
+                EMAIL: email,
+                PHONE: '1010101010',
                 PASSWORD: TEST_PASSWORD
             }
         }
@@ -79,8 +68,8 @@ class ARLibTest(TestCase):
         data = {
             CONTENT: {
                 LIBRARY_NAME: TEST_LBRY_NAME,
-                LOCATION: TEST_LBRY_LOC,
-                PHONE: TEST_LBRY_PHONE
+                LOCATION: 'manhattan',
+                PHONE: '0101010101'
             }
         }
 
@@ -98,14 +87,14 @@ class ARLibTest(TestCase):
             CONTENT: {
                 ROOM_ID: TEST_ROOM_ID,
                 LIBRARY_NAME: TEST_LBRY_NAME,
-                ROOM_TYPE: TEST_ROOM_TYPE,
-                MIN_CAPACITY: TEST_ROOM_MINCAP,
-                MAX_CAPACITY: TEST_ROOM_MAXCAP,
-                NOISE_LEVEL: TEST_ROOM_NOISELVL,
-                OPEN_HOUR: TEST_ROOM_OPENHR,
-                OPEN_MINUTE: TEST_ROOM_OPENMIN,
-                CLOSE_HOUR: TEST_ROOM_CLOSEHR,
-                CLOSE_MINUTE: TEST_ROOM_CLOSEMIN
+                ROOM_TYPE: 'study',
+                MIN_CAPACITY: 2,
+                MAX_CAPACITY: 8,
+                NOISE_LEVEL: 2,
+                OPEN_HOUR: 8,
+                OPEN_MINUTE: 0,
+                CLOSE_HOUR: 20,
+                CLOSE_MINUTE: 0
             }
         }
 
