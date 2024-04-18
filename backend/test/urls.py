@@ -21,6 +21,8 @@ urlpatterns = [
     path('createLibrary/', views.create_library),
     path('createRoom/', views.create_room),
     path('registerStudent/', views.register_student),
+    path('loginStudent/', views.login_student),
+    path('logoutStudent/', views.logout_student),
     path('createReservation/', views.create_reservation),
     path('deleteReservation/', views.delete_reservation),
     path('checkRoomAvailability/<slug:roomId>/', views.check_room_availability),
@@ -30,6 +32,5 @@ urlpatterns = [
     path('myReservations/', views.get_all_reservations_for_a_student),
     path('getAllReservations/', views.get_all_reservations),
     path('getReservationsInTimeRange/',views.get_reservations_in_time_range),
-    path('clearExpiredTimeSlots/',views.clear_expired_time_slots),
-    path('getAvailableTimesForRoom/<str:library>/<str:room>',views.get_available_times_for_room),
+    path('availableTimes/<str:roomId>/<str:date>/', views.available_times)
 ]
