@@ -113,7 +113,7 @@ def create_reservation(request):
     """
     Requires roomId, libraryName, room_type, minCapacity, maxCapacity
     noiseLevel, date, startHour, endHour, startMinute, endMinute
-    in request body 
+    in request body
     """
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
@@ -133,7 +133,7 @@ def create_reservation(request):
         raise ex
     except models.Library.DoesNotExist as ex:
         raise ex
-    
+
     year, month, day = [int(x) for x in content['date'].split('-')]
     date_dt = datetime.date(year, month, day)
     startTime = datetime.time(content["startHour"], content["startMinute"])
@@ -141,7 +141,7 @@ def create_reservation(request):
     if date_dt < datetime.date.today() or \
         date_dt == datetime.date.today and startTime < datetime.datetime.now().time():
         raise ValueError("Requested date is already past")
-    
+
     reservations = list(models.Reservations.objects.filter(
         studentId=None,
         roomId=content['roomId'],
@@ -151,7 +151,7 @@ def create_reservation(request):
         endTime__gte=endTime))
 
     print('skibidi gyatt '+str(reservations))
-    
+
     if len(reservations) != 1:
         raise ValueError("Section is already reserved/is not open at this time")
 
@@ -172,7 +172,7 @@ def create_reservation(request):
             endTime=startTime,
             studentId=None
         )
-    
+
     if rightEnd > endTime:
         models.Reservations.objects.create(
             libraryName=library,
@@ -391,3 +391,27 @@ def available_times(request, roomId, date):
             open = temp
     
     return Response(open)
+
+@api_view(['DELETE'])
+def clear_expired_time_slots(request):
+    allres=models.Reservations.objects.all().values()
+    currenttime=datetime.now()
+    for res in allres:
+        if res.endTime<currenttime:
+            res.delete()
+    #return Response(res)
+
+@api_view(['GET'])
+def get_all_libraries(request):
+    libs=models.Library.objects.all().values()
+    return Response(libs)
+
+@api_view(['GET'])
+def get_all_rooms_for_library(request,libraryName):
+    match=models.Room.objects.filter(libraryName=libraryName).values()
+    return Response(match)
+
+@api_view(['GET'])
+def get_all_students(request):
+    students=models.Student.objects.all().values()
+    return Response(students)
