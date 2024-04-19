@@ -107,90 +107,19 @@ def logout_student(request):
         del request.session['studentId']
     return Response()
 
-# @api_view(['POST'])
-# def create_reservation(request):
-#     # TODO: rewrite this completely
-#     """
-#     Requires roomId, libraryName, room_type, minCapacity, maxCapacity
-#     noiseLevel, date, startHour, endHour, startMinute, endMinute
-#     in request body
-#     """
-#     body_unicode = request.body.decode('utf-8')
-#     body = json.loads(body_unicode)
-#     content = body['content']
-#     print(f'{content=}')
-#
-#     try:
-#         student = models.Student.objects.get(pk=content['studentId'])
-#         print(f'{student}')
-#         room = models.Room.objects.get(roomId=content['roomId'])
-#         print(f'{room=}')
-#         library = models.Library.objects.get(libraryName=content['libraryName'])
-#         print(f'{library=}')
-#     except models.Student.DoesNotExist as ex:
-#         raise ex
-#     except models.Room.DoesNotExist as ex:
-#         raise ex
-#     except models.Library.DoesNotExist as ex:
-#         raise ex
-#
-#     year, month, day = [int(x) for x in content['date'].split('-')]
-#     date_dt = datetime.date(year, month, day)
-#     startTime = datetime.time(content["startHour"], content["startMinute"])
-#     endTime = datetime.time(content["endHour"], content["endMinute"])
-#     if date_dt < datetime.date.today() or \
-#         date_dt == datetime.date.today and startTime < datetime.datetime.now().time():
-#         raise ValueError("Requested date is already past")
-#
-#     reservations = list(models.Reservations.objects.filter(
-#         studentId=None,
-#         roomId=content['roomId'],
-#         libraryName=library,
-#         date=date_dt,
-#         startTime__lte=startTime,
-#         endTime__gte=endTime))
-#
-#     print('skibidi gyatt '+str(reservations))
-#
-#     if len(reservations) != 1:
-#         raise ValueError("Section is already reserved/is not open at this time")
-#
-#     leftStart = reservations[0].startTime
-#     rightEnd = reservations[0].endTime
-#     reservations[0].startTime = startTime
-#     reservations[0].endTime = endTime
-#     reservations[0].studentId = student
-#     print(reservations[0])
-#     reservations[0].save()
-#
-#     if leftStart < startTime:
-#         models.Reservations.objects.create(
-#             libraryName=library,
-#             roomId=content["roomId"],
-#             date=date_dt,
-#             startTime=leftStart,
-#             endTime=startTime,
-#             studentId=None
-#         )
-#
-#     if rightEnd > endTime:
-#         models.Reservations.objects.create(
-#             libraryName=library,
-#             roomId=content["roomId"],
-#             date=date_dt,
-#             startTime=endTime,
-#             endTime=rightEnd,
-#             studentId=None
-#         )
-#
-#     return Response()
-
 @api_view(['POST'])
 def create_reservation(request):
+    # TODO: rewrite this completely
+    """
+    Requires roomId, libraryName, room_type, minCapacity, maxCapacity
+    noiseLevel, date, startHour, endHour, startMinute, endMinute
+    in request body
+    """
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
     content = body['content']
     print(f'{content=}')
+
     try:
         student = models.Student.objects.get(pk=content['studentId'])
         print(f'{student}')
@@ -204,6 +133,7 @@ def create_reservation(request):
         raise ex
     except models.Library.DoesNotExist as ex:
         raise ex
+
     year, month, day = [int(x) for x in content['date'].split('-')]
     date_dt = datetime.date(year, month, day)
     startTime = datetime.time(content["startHour"], content["startMinute"])
@@ -211,14 +141,48 @@ def create_reservation(request):
     if date_dt < datetime.date.today() or \
         date_dt == datetime.date.today and startTime < datetime.datetime.now().time():
         raise ValueError("Requested date is already past")
-    models.Reservations.objects.create(
+
+    reservations = list(models.Reservations.objects.filter(
+        studentId=None,
+        roomId=content['roomId'],
         libraryName=library,
-        roomId=content["roomId"],
         date=date_dt,
-        startTime=startTime,
-        endTime=endTime,
-        studentId=None
-    )
+        startTime__lte=startTime,
+        endTime__gte=endTime))
+
+    print('skibidi gyatt '+str(reservations))
+
+    if len(reservations) != 1:
+        raise ValueError("Section is already reserved/is not open at this time")
+
+    leftStart = reservations[0].startTime
+    rightEnd = reservations[0].endTime
+    reservations[0].startTime = startTime
+    reservations[0].endTime = endTime
+    reservations[0].studentId = student
+    print(reservations[0])
+    reservations[0].save()
+
+    if leftStart < startTime:
+        models.Reservations.objects.create(
+            libraryName=library,
+            roomId=content["roomId"],
+            date=date_dt,
+            startTime=leftStart,
+            endTime=startTime,
+            studentId=None
+        )
+
+    if rightEnd > endTime:
+        models.Reservations.objects.create(
+            libraryName=library,
+            roomId=content["roomId"],
+            date=date_dt,
+            startTime=endTime,
+            endTime=rightEnd,
+            studentId=None
+        )
+
     return Response()
 
 @api_view(['DELETE'])
@@ -443,12 +407,8 @@ def get_all_libraries(request):
     return Response(libs)
 
 @api_view(['GET'])
-def get_all_rooms_for_library(request,lib):
-    rooms=models.Room.objects.all().values()
-    match=[]
-    for room in rooms:
-        if room.library_id==lib:
-            match.append(room)
+def get_all_rooms_for_library(request,libraryName):
+    match=models.Room.objects.filter(libraryName=libraryName).values()
     return Response(match)
 
 @api_view(['GET'])
