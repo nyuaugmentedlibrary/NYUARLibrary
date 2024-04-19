@@ -2,12 +2,12 @@ import json
 from django.shortcuts import render
 from django.db.utils import IntegrityError
 from django.db.models import Q
-from django.contrib.auth import authenticate
+from django.contrib.auth.hashers import check_password
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from . import models
 from .utils.fcns import *
-import datetime
+from datetime import datetime
 import random
 
 # Create your views here.
@@ -92,8 +92,8 @@ def login_student(request):
 
     try:
         student = models.Student.objects.get(pk=content['studentId'])
-        if not authenticate(student, password=content['password']):
-            raise ValueError("Incorrect password")
+        if not check_password(content['password'], student.password):
+            raise ValueError("Invalid password")
     except models.Student.DoesNotExist as ex:
         raise ex
 
