@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from . import models
 from .utils.fcns import *
-from datetime import datetime
+from datetime import datetime, date, time
 import random
 
 # Create your views here.
@@ -44,8 +44,8 @@ def create_room(request):
 
     try:
         library = models.Library.objects.get(pk=content['libraryName'])
-        openTime = datetime.time(content["openHour"], content["openMinute"])
-        closeTime = datetime.time(content["closeHour"], content["closeMinute"])
+        openTime = time(content["openHour"], content["openMinute"])
+        closeTime = time(content["closeHour"], content["closeMinute"])
         models.Room.objects.create(
             roomId=content['roomId'],
             libraryName=library,
@@ -135,11 +135,11 @@ def create_reservation(request):
         raise ex
 
     year, month, day = [int(x) for x in content['date'].split('-')]
-    date_dt = datetime.date(year, month, day)
-    startTime = datetime.time(content["startHour"], content["startMinute"])
-    endTime = datetime.time(content["endHour"], content["endMinute"])
-    if date_dt < datetime.date.today() or \
-        date_dt == datetime.date.today and startTime < datetime.datetime.now().time():
+    date_dt = date(year, month, day)
+    startTime = time(content["startHour"], content["startMinute"])
+    endTime = time(content["endHour"], content["endMinute"])
+    if date_dt < date.today() or \
+        date_dt == date.today and startTime < datetime.now().time():
         raise ValueError("Requested date is already past")
 
     reservations = list(models.Reservations.objects.filter(
@@ -204,9 +204,9 @@ def delete_reservation(request):
         raise ex
     
     year, month, day = [int(x) for x in content['date'].split('-')]
-    date_dt = datetime.date(year, month, day)
-    startTime = datetime.time(content["startHour"], content["startMinute"])
-    endTime = datetime.time(content["endHour"], content["endMinute"])
+    date_dt = date(year, month, day)
+    startTime = time(content["startHour"], content["startMinute"])
+    endTime = time(content["endHour"], content["endMinute"])
 
     reservations = list(models.Reservations.objects.filter(
         studentId=content['studentId'],
@@ -278,7 +278,7 @@ def get_available_rooms(request, start_time, end_time):
     end_time = datetime.strptime(end_time_str, "%H:%M").time()
 
     year, month, day = [int(x) for x in content['date'].split('-')]
-    rsrvDate = datetime.date(year, month, day)
+    rsrvDate = date(year, month, day)
 
     """
     conditions checked to determine if a room is unavailable:
@@ -369,7 +369,7 @@ def available_times(request, roomId, date):
 
     # parse date from parameter
     year, month, day = [int(x) for x in date.split('-')]
-    date = datetime.date(year, month, day)
+    date = date(year, month, day)
 
     # get opening and closing time of room
     my_room = models.Room.objects.get(pk=roomId)
