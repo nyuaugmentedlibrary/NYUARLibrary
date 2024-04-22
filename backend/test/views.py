@@ -396,15 +396,30 @@ def available_times(request, roomId, date_str):
     
     return Response(open)
 
+# @api_view(['DELETE'])
+# def clear_expired_time_slots(request):
+#     allres = models.Reservations.objects.all().values()
+#     currentdatetime = datetime.now()
+#     for res in allres:
+#         print('res is '+str(res.keys()))
+#         etdt=datetime.combine(datetime.today(),res['endTime'])
+#         if etdt < currentdatetime:
+#             print('Deleting reservation for '+res['studentId_id']+' at '+res['roomId_id'])
+#             res.delete()
+    #return Response(request)
+
 @api_view(['DELETE'])
 def clear_expired_time_slots(request):
-    allres = models.Reservations.objects.all().values()
-    currentdatetime = datetime.now()
-    for res in allres:
-        if res.endTime < currentdatetime:
-            print('Deleting reseration for '+res.studentId+' at '+res.room)
-            res.delete()
-    #return Response(request)
+    dtobj=datetime.now()
+    today=dtobj.date()
+    rightnow=dtobj.time()
+    expiredres=models.Reservations.objects.filter(
+        date__lte=today,
+        endTime__lte=rightnow,
+    )
+    for res in expiredres:
+        res.delete()
+    return Response({'message':'Expired time slots have been cleared'})
 
 @api_view(['GET'])
 def get_all_libraries(request):
