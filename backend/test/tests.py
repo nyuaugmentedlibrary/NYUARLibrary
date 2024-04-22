@@ -1,11 +1,14 @@
 from django.test import TestCase, Client
 from django.db import connection
+from django.contrib.auth.hashers import make_password
+from datetime import datetime, time
 from . import models
 
 # Endpoints
 REGISTER       = '/test/registerStudent/'
 CREATE_LIBRARY = '/test/createLibrary/'
 CREATE_ROOM = '/test/createRoom/'
+AVAILABLE_TIMES = '/test/availableTimes/'
 
 # Request Body Fields
 CONTENT      = 'content'
@@ -109,5 +112,72 @@ class ARLibTest(TestCase):
     def test_db_connection(self):
         self.assertTrue(connection is not None)
 
-        
-        
+class AvailableTimesTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.library = models.Library.objects.create(
+            libraryName=TEST_LBRY_NAME,
+            location='Manhattan',
+            phone='0101010101',
+        )
+        self.room = models.Room.objects.create(
+            roomId=TEST_ROOM_ID,
+            libraryName=self.library,
+            roomType='study',
+            minCapacity=2,
+            maxCapacity=8,
+            noiseLevel=2,
+            openTime=time(8, 0),
+            closeTime=time(20, 0),
+        )
+        self.room2 = models.Room.objects.create(
+            roomId='OTHER123',
+            libraryName=self.library,
+            roomType='study',
+            minCapacity=2,
+            maxCapacity=8,
+            noiseLevel=2,
+            openTime=time(8, 0),
+            closeTime=time(20, 0),
+        )
+        self.student = models.Student.objects.create(
+            studentId='abc123',
+            email='student@example.com',
+            password=make_password('password'),
+            phone='0101010101',
+        )
+        self.reservation = models.Reservations.objects.create(
+            roomId=self.room,
+            studentId=self.student,
+            date=datetime(2024, 1, 1).date(),
+            startTime=time(10, 0),
+            endTime=time(12, 0),
+        )
+        self.reservation2 = models.Reservations.objects.create(
+            roomId=self.room,
+            studentId=self.student,
+            date=datetime(2024, 1, 1).date(),
+            startTime=time(12, 0),
+            endTime=time(14, 0),
+        )
+        self.reservation3 = models.Reservations.objects.create(
+            roomId=self.room,
+            studentId=self.student,
+            date=datetime(2024, 1, 1).date(),
+            startTime=time(17, 0),
+            endTime=time(20, 0),
+        )
+        self.reservation4 = models.Reservations.objects.create(
+            roomId=self.room2,
+            studentId=self.student,
+            date=datetime(2024, 1, 1).date(),
+            startTime=time(8, 0),
+            endTime=time(10, 0),
+        )
+
+    def test_available_times(self):
+        response = self.client.get(path=(AVAILABLE_TIMES + TEST_ROOM_ID + '/2024-01-01/'))
+        self.assertEqual(response.status_code, 200)
+        print(response.data)
+        self.assertEqual(response.data, [(time(8, 0), time(10, 0)), (time(14, 0), time(17, 0))])
+    

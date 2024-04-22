@@ -32,7 +32,7 @@ urlpatterns = [
     path('myReservations/', views.get_all_reservations_for_a_student),
     path('getAllReservations/', views.get_all_reservations),
     path('getReservationsInTimeRange/',views.get_reservations_in_time_range),
-    path('availableTimes/<str:roomId>/<str:date>/', views.available_times),
+    path('availableTimes/<str:roomId>/<str:date_str>/', views.available_times),
     path('clearExpiredTimeSlots/', views.clear_expired_time_slots),
     path('getAllLibraries/', views.get_all_libraries),
     path('getAllRoomsForLibrary/<str:libraryName>/', views.get_all_rooms_for_library),

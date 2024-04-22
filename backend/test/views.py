@@ -361,15 +361,15 @@ def get_reservations_in_time_range(request):
     return Response(res)
 
 @api_view(['GET'])
-def available_times(request, roomId, date):
+def available_times(request, roomId, date_str):
     """
     returns the times that a room is available
     """
     open = []
 
     # parse date from parameter
-    year, month, day = [int(x) for x in date.split('-')]
-    date = date(year, month, day)
+    year, month, day = [int(x) for x in date_str.split('-')]
+    date_obj = date(year, month, day)
 
     # get opening and closing time of room
     my_room = models.Room.objects.get(pk=roomId)
@@ -378,26 +378,30 @@ def available_times(request, roomId, date):
     # get all reservations where room and date match
     reservations = models.Reservations.objects.filter(
         roomId = roomId,
-        date = date)
+        date = date_obj)
 
-    # remove closed times from the open times
-    for r in reservations:
-        temp = []
-        for open_l, open_r in open:
-            if open_l < r.startTime:
-                temp.append((open_l, min(open_r, r.startTime)))
-            if open_r > r.endTime:
-                temp.append((max(open_l, r.endTime), open_r))
-            open = temp
+    # iterate through reservations
+    for res in reservations:
+        for i in range(len(open)):
+            if res.startTime >= open[i][0] and res.startTime <= open[i][1]:
+                # split open time range into two ranges
+                if open[i][0] < res.startTime:
+                    open.insert(i, (open[i][0], res.startTime))
+                    i += 1
+                if open[i][1] > res.endTime:
+                    open.insert(i, (res.endTime, open[i][1]))
+                    i += 1
+                open.pop(i)
+                break
     
     return Response(open)
 
 @api_view(['DELETE'])
 def clear_expired_time_slots(request):
-    allres=models.Reservations.objects.all().values()
-    currenttime=datetime.now()
+    allres = models.Reservations.objects.all().values()
+    currenttime = datetime.now()
     for res in allres:
-        if res.endTime<currenttime:
+        if res.endTime < currenttime:
             res.delete()
     #return Response(res)
 
