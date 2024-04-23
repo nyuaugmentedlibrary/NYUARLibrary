@@ -396,24 +396,31 @@ def available_times(request, roomId, date_str):
     
     return Response(open)
 
+
 @api_view(['DELETE'])
 def clear_expired_time_slots(request):
-    allres = models.Reservations.objects.all().values()
-    currenttime = datetime.now()
-    for res in allres:
-        if res.endTime < currenttime:
-            res.delete()
-    #return Response(res)
+    dtobj=datetime.now()
+    today=dtobj.date()
+    rightnow=dtobj.time()
+    expiredres=models.Reservations.objects.filter(
+        date__lte=today,
+        endTime__lte=rightnow,
+    )
+    for res in expiredres:
+        res.delete()
+    return Response({'message':'Expired time slots have been cleared'})
 
 @api_view(['GET'])
 def get_all_libraries(request):
     libs=models.Library.objects.all().values()
     return Response(libs)
 
+
 @api_view(['GET'])
 def get_all_rooms_for_library(request,libraryName):
     match=models.Room.objects.filter(libraryName=libraryName).values()
     return Response(match)
+
 
 @api_view(['GET'])
 def get_all_students(request):
