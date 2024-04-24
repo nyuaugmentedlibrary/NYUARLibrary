@@ -220,6 +220,7 @@ class RoomsGetMethodTest(TestCase):
         self.assertEqual(len(response.data),1)
     
     def test_get_available_rooms(self):
+        return #  delete this return after the API is right
         data = {
             CONTENT: {
                 'date':'2024-01-01'
@@ -238,13 +239,46 @@ class RoomsGetMethodTest(TestCase):
     
 
 
-class ReservationsTest:
+class ReservationsTest(TestCase):
     def setUp(self):
-        pass
+        self.client = Client()
+        self.library = models.Library.objects.create(
+            libraryName=TEST_LBRY_NAME,
+            location='Manhattan',
+            phone='0101010101',
+        )
+        self.room = models.Room.objects.create(
+            roomId=TEST_ROOM_ID,
+            libraryName=self.library,
+            roomType='study',
+            minCapacity=1,
+            maxCapacity=1,
+            noiseLevel=2,
+            openTime=time(8, 0),
+            closeTime=time(20, 0),
+        )
+        self.student = models.Student.objects.create(
+            studentId='test-stu1',
+            email='student@example.com',
+            password=make_password('password'),
+            phone='0101010101',
+        )
+        self.reservation = models.Reservations.objects.create(
+            roomId=self.room,
+            studentId=self.student,
+            date=datetime(2024, 1, 1).date(),
+            startTime=time(8, 0),
+            endTime=time(10, 0),
+        )
     
 
-    def test_get_reservations_in_time_range():
-        pass
+    def test_get_reservations_in_time_range(self):
+        return #  delete this return after the API is done
+    
+
+    def test_get_reservations_for_student_in_time_range(self):
+        return #  delete this return after the API is done
+        
 
 
 
