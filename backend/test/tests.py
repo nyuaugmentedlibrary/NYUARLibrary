@@ -181,3 +181,71 @@ class AvailableTimesTest(TestCase):
         print(response.data)
         self.assertEqual(response.data, [(time(8, 0), time(10, 0)), (time(14, 0), time(17, 0))])
     
+
+
+class RoomsGetMethodTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.library = models.Library.objects.create(
+            libraryName=TEST_LBRY_NAME,
+            location='Manhattan',
+            phone='0101010101',
+        )
+        self.room = models.Room.objects.create(
+            roomId=TEST_ROOM_ID,
+            libraryName=self.library,
+            roomType='study',
+            minCapacity=1,
+            maxCapacity=1,
+            noiseLevel=2,
+            openTime=time(8, 0),
+            closeTime=time(20, 0),
+        )
+        self.student = models.Student.objects.create(
+            studentId='test-stu1',
+            email='student@example.com',
+            password=make_password('password'),
+            phone='0101010101',
+        )
+        self.reservation = models.Reservations.objects.create(
+            roomId=self.room,
+            studentId=self.student,
+            date=datetime(2024, 1, 1).date(),
+            startTime=time(8, 0),
+            endTime=time(10, 0),
+        )
+    
+    def test_get_all_rooms(self):
+        response = self.client.get(path=('/test/getAllRooms/'),content_type=CONTENT_TYPE_JSON)
+        self.assertEqual(len(response.data),1)
+    
+    def test_get_available_rooms(self):
+        data = {
+            CONTENT: {
+                'date':'2024-01-01'
+            }
+        }
+        response = self.client.get(path=('/test/getAvailableRooms/8:00/9:00/'),data=data, 
+                                    content_type=CONTENT_TYPE_JSON)
+       
+        self.assertEqual(len(response.data),0)
+
+        response = self.client.get(path=('/test/getAvailableRooms/12:00/4:00/'),data=data, 
+                                    content_type=CONTENT_TYPE_JSON)
+       
+        self.assertEqual(len(response.data),1)
+
+    
+
+
+class ReservationsTest:
+    def setUp(self):
+        pass
+    
+
+    def test_get_reservations_in_time_range():
+        pass
+
+
+
+
