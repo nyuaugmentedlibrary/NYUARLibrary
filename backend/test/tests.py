@@ -2,6 +2,7 @@ from django.test import TestCase, Client
 from django.db import connection
 from django.contrib.auth.hashers import make_password
 from datetime import datetime, time
+import json
 from . import models
 
 # Endpoints
@@ -174,6 +175,13 @@ class AvailableTimesTest(TestCase):
             startTime=time(8, 0),
             endTime=time(10, 0),
         )
+        self.reservation4 = models.Reservations.objects.create(
+            roomId=self.room2,
+            studentId=self.student,
+            date=datetime.now().date(),
+            startTime=time(8, 0),
+            endTime=time(10, 0),
+        ) 
 
     def test_available_times(self):
         response = self.client.get(path=(AVAILABLE_TIMES + TEST_ROOM_ID + '/2024-01-01/'))
@@ -181,3 +189,32 @@ class AvailableTimesTest(TestCase):
         print(response.data)
         self.assertEqual(response.data, [(time(8, 0), time(10, 0)), (time(14, 0), time(17, 0))])
     
+    def test_create_reservation(self):
+        url = '/test/createReservation/'
+        date = datetime.now().date().isoformat()
+        data = {
+            'content': {
+                'studentId': TEST_STUDENTID,
+                'roomId': TEST_ROOM_ID,
+                'libraryName': TEST_LBRY_NAME,
+                'date': date,
+                'startHour': 11,
+                'startMinute': 0,
+                'endHour': 11,
+                'endMinute': 15
+            }
+        }
+
+        response = self.client.post(url, data=json.dumps(data), content_type='application/json')
+
+        self.assertEqual(response.status_code, 200, "Response status code should be 200.")
+
+        reservations = models.Reservations.objects.filter(roomId=TEST_ROOM_ID, date=date)
+        self.assertEqual(len(reservations), 1, "Exactly one reservation should be created.")
+
+        reservation = reservations[0]
+        self.assertEqual(reservation.roomId.roomId, TEST_ROOM_ID, "The room ID should match.")
+        self.assertEqual(reservation.studentId.studentId, TEST_STUDENTID, "The student ID should match.")
+        self.assertEqual(reservation.date.strftime('%Y-%m-%d'), date, "The date should match the requested date.")
+        self.assertEqual(reservation.startTime, time(11, 0), "The start time should be 11:00.")
+        self.assertEqual(reservation.endTime, time(11, 15), "The end time should be 11:15.")  
