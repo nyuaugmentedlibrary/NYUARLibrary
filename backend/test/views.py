@@ -265,7 +265,8 @@ def check_room_availability(request, roomId):
 def get_all_rooms(request):
     rooms = models.Room.objects.all().values()
     return Response(rooms)
-
+    
+# There are bugs in this api
 @api_view(['GET'])
 def get_available_rooms(request, start_time, end_time):
     """
@@ -298,6 +299,7 @@ def get_available_rooms(request, start_time, end_time):
 
     return Response(available)
 
+# There are bugs in this api
 @api_view(['GET'])
 def get_reservations_for_student_in_time_range(request, start_time, end_time):
     if 'studentId' not in request.session:
@@ -332,6 +334,8 @@ def get_all_reservations(request):
     res = models.Reservations.objects.all().values()
     return Response(res)
 
+
+# There are bugs in this api
 @api_view(['GET'])
 def get_reservations_in_time_range(request):
     # TODO rewrite this
