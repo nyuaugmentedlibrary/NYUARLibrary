@@ -196,7 +196,6 @@ class AvailableTimesTest(TestCase):
             'content': {
                 'studentId': TEST_STUDENTID,
                 'roomId': TEST_ROOM_ID,
-                'libraryName': TEST_LBRY_NAME,
                 'date': date,
                 'startHour': 11,
                 'startMinute': 0,

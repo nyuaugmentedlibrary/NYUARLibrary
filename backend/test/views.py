@@ -112,8 +112,8 @@ def logout_student(request):
 def create_reservation(request):
   
     """
-    Requires roomId, libraryName, room_type, minCapacity, maxCapacity
-    noiseLevel, date, startHour, endHour, startMinute, endMinute
+    Requires studentId, roomId, date, 
+    startHour, endHour, startMinute, endMinute
     in request body
     """
     body_unicode = request.body.decode('utf-8')
@@ -126,8 +126,6 @@ def create_reservation(request):
         print(f'{student}')
         room = models.Room.objects.get(roomId=content['roomId'])
         print(f'{room=}')
-        library = models.Library.objects.get(libraryName=content['libraryName'])
-        print(f'{library=}')
     except models.Student.DoesNotExist as ex:
         raise ex
     except models.Room.DoesNotExist as ex:
