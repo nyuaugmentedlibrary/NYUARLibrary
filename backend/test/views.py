@@ -248,10 +248,11 @@ def get_available_rooms(request, start_time, end_time):
     
     !date must be formatted as year-month-day
     """
-    start_time = datetime.strptime(start_time_str, "%H:%M").time()
-    end_time = datetime.strptime(end_time_str, "%H:%M").time()
+    start_time = datetime.strptime(start_time, "%H:%M").time()
+    end_time = datetime.strptime(end_time, "%H:%M").time()
 
-    year, month, day = [int(x) for x in content['date'].split('-')]
+    # TODO: Date should be passed in URL (broken)
+    # year, month, day = [int(x) for x in content['date'].split('-')]
     rsrvDate = date(year, month, day)
 
     """
@@ -276,7 +277,7 @@ def get_available_rooms(request, start_time, end_time):
 def get_reservations_for_student_in_time_range(request, start_time, end_time):
     if 'studentId' not in request.session:
         raise ValueError("Not logged in")
-    # TODO rewrite this
+    # TODO rewrite this (broken)
     dt_start=dt_end=None
     try:
         dt_start=datetime.strptime(start_time,"%Y-%m-%dT%H:%M:%S")
@@ -308,7 +309,7 @@ def get_all_reservations(request):
 
 @api_view(['GET'])
 def get_reservations_in_time_range(request):
-    # TODO rewrite this
+    # TODO rewrite this (broken)
     """
     Requires start_time, end_time in request body
     """
