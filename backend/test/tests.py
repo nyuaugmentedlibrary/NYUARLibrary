@@ -175,7 +175,7 @@ class AvailableTimesTest(TestCase):
             startTime=time(8, 0),
             endTime=time(10, 0),
         )
-        self.reservation4 = models.Reservations.objects.create(
+        self.reservation5 = models.Reservations.objects.create(
             roomId=self.room2,
             studentId=self.student,
             date=datetime.now().date(),
@@ -189,7 +189,7 @@ class AvailableTimesTest(TestCase):
         print(response.data)
         self.assertEqual(response.data, [(time(8, 0), time(10, 0)), (time(14, 0), time(17, 0))])
     
-    def test_create_reservation(self):
+    def test_create_reservations(self):
         url = '/test/createReservation/'
         date = datetime.now().date().isoformat()
         data = {
@@ -200,7 +200,7 @@ class AvailableTimesTest(TestCase):
                 'startHour': 11,
                 'startMinute': 0,
                 'endHour': 11,
-                'endMinute': 15
+                'endMinute': 30
             }
         }
 
@@ -216,4 +216,129 @@ class AvailableTimesTest(TestCase):
         self.assertEqual(reservation.studentId.studentId, TEST_STUDENTID, "The student ID should match.")
         self.assertEqual(reservation.date.strftime('%Y-%m-%d'), date, "The date should match the requested date.")
         self.assertEqual(reservation.startTime, time(11, 0), "The start time should be 11:00.")
-        self.assertEqual(reservation.endTime, time(11, 15), "The end time should be 11:15.")  
+        self.assertEqual(reservation.endTime, time(11, 30), "The end time should be 11:30.")
+
+        # Try to create a reservation that overlaps but with a different room
+        data['content']['roomId'] = 'OTHER123'
+        response = self.client.post(url, data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 200, "Response status code should be 200.")
+
+        # Try to create a reservation that overlaps in time
+        data['content']['roomId'] = TEST_ROOM_ID
+        data['content']['startHour'] = 10
+        data['content']['startMinute'] = 15
+        data['content']['endHour'] = 11
+        data['content']['endMinute'] = 45
+
+        response = self.client.post(url, data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 400, "Response status code should be 400.")
+
+        # Try to create a reservation that is past the room closing time
+        data['content']['startHour'] = 20
+        data['content']['startMinute'] = 15
+        data['content']['endHour'] = 21
+        data['content']['endMinute'] = 45
+
+        response = self.client.post(url, data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 400, "Response status code should be 400.")
+
+        # Try to create a reservation that is right after our original reservation
+        data['content']['startHour'] = 11
+        data['content']['startMinute'] = 30
+        data['content']['endHour'] = 12
+        data['content']['endMinute'] = 0
+
+        response = self.client.post(url, data=json.dumps(data), content_type='application/json')
+        self.assertEqual(response.status_code, 200, "Response status code should be 200.")
+
+class RoomsGetMethodTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.library = models.Library.objects.create(
+            libraryName=TEST_LBRY_NAME,
+            location='Manhattan',
+            phone='0101010101',
+        )
+        self.room = models.Room.objects.create(
+            roomId=TEST_ROOM_ID,
+            libraryName=self.library,
+            roomType='study',
+            minCapacity=1,
+            maxCapacity=1,
+            noiseLevel=2,
+            openTime=time(8, 0),
+            closeTime=time(20, 0),
+        )
+        self.student = models.Student.objects.create(
+            studentId='abc123',
+            email='student@example.com',
+            password=make_password('password'),
+            phone='0101010101',
+        )
+        self.reservation = models.Reservations.objects.create(
+            roomId=self.room,
+            studentId=self.student,
+            date=datetime(2024, 1, 1).date(),
+            startTime=time(8, 0),
+            endTime=time(10, 0),
+        )
+
+    def test_get_all_rooms(self):
+        response = self.client.get(path=('/test/getAllRooms/'),content_type=CONTENT_TYPE_JSON)
+        self.assertEqual(len(response.data), 1)
+
+    def test_get_available_rooms(self):
+        """
+        data = {
+            CONTENT: {
+                'date':'2024-01-01'
+            }
+        }
+        response = self.client.get(path=('/test/getAvailableRooms/8:00/9:00/'), data=data, 
+                                    content_type=CONTENT_TYPE_JSON)
+
+        self.assertEqual(len(response.data), 0)
+
+        response = self.client.get(path=('/test/getAvailableRooms/12:00/4:00/'), data=data, 
+                                    content_type=CONTENT_TYPE_JSON)
+
+        self.assertEqual(len(response.data), 1)
+        """
+
+class ReservationsTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.library = models.Library.objects.create(
+            libraryName=TEST_LBRY_NAME,
+            location='Manhattan',
+            phone='0101010101',
+        )
+        self.room = models.Room.objects.create(
+            roomId=TEST_ROOM_ID,
+            libraryName=self.library,
+            roomType='study',
+            minCapacity=1,
+            maxCapacity=1,
+            noiseLevel=2,
+            openTime=time(8, 0),
+            closeTime=time(20, 0),
+        )
+        self.student = models.Student.objects.create(
+            studentId='abc123',
+            email='student@example.com',
+            password=make_password('password'),
+            phone='0101010101',
+        )
+        self.reservation = models.Reservations.objects.create(
+            roomId=self.room,
+            studentId=self.student,
+            date=datetime(2024, 1, 1).date(),
+            startTime=time(8, 0),
+            endTime=time(10, 0),
+        )
+
+    def test_get_reservations_in_time_range(self):
+        return
+
+    def test_get_reservations_for_student_in_time_range(self):
+        return
