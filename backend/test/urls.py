@@ -18,23 +18,61 @@ from django.urls import path, include
 from . import views
 
 urlpatterns = [
-    path('createLibrary/', views.create_library),
-    path('createRoom/', views.create_room),
-    path('registerStudent/', views.register_student),
-    path('loginStudent/', views.login_student),
-    path('logoutStudent/', views.logout_student),
-    path('createReservation/', views.create_reservation),
-    path('deleteReservation/', views.delete_reservation),
-    path('checkRoomAvailability/<slug:roomId>/', views.check_room_availability),
-    path('getAllRooms/', views.get_all_rooms),
-    path('getAvailableRooms/<str:start_time>/<str:end_time>/', views.get_available_rooms),
-    path('myReservationsTimeRange/<str:start_time>/<str:end_time>/',views.get_reservations_for_student_in_time_range),
-    path('myReservations/', views.get_all_reservations_for_a_student),
-    path('getAllReservations/', views.get_all_reservations),
-    path('getReservationsInTimeRange/',views.get_reservations_in_time_range),
-    path('availableTimes/<str:roomId>/<str:date_str>/', views.available_times),
-    path('clearExpiredTimeSlots/', views.clear_expired_time_slots),
-    path('getAllLibraries/', views.get_all_libraries),
-    path('getAllRoomsForLibrary/<str:libraryName>/', views.get_all_rooms_for_library),
-    path('getAllStudents/',views.get_all_students),
+    path(
+        'createLibrary/',
+        views.create_library),
+    path(
+        'createRoom/',
+        views.create_room),
+    path(
+        'registerStudent/',
+        views.register_student),
+    path(
+        'loginStudent/',
+        views.login_student),
+    path(
+        'logoutStudent/',
+        views.logout_student),
+    path(
+        'createReservation/',
+        views.create_reservation),
+    path(
+        'deleteReservation/',
+        views.delete_reservation),
+    path(
+        'checkRoomAvailability/<slug:roomId>/',
+        views.check_room_availability),
+    path(
+        'getAllRooms/',
+        views.get_all_rooms),
+    path(
+        'getAvailableRooms/<str:start_time>/<str:end_time>/',
+        views.get_available_rooms),
+    path(
+        'myReservationsTimeRange/<str:start_time>/<str:end_time>/',
+        views.get_reservations_for_student_in_time_range),
+    path(
+        'myReservations/',
+        views.get_all_reservations_for_a_student),
+    path(
+        'getAllReservations/',
+        views.get_all_reservations),
+    path(
+        'getReservationsInTimeRange/',
+        views.get_reservations_in_time_range),
+    path(
+        'availableTimes/<str:roomId>/<str:date_str>/',
+        views.available_times),
+    path(
+        'clearExpiredTimeSlots/',
+        views.clear_expired_time_slots),
+    path(
+        'getAllLibraries/',
+        views.get_all_libraries),
+    path(
+        'getAllRoomsForLibrary/<str:libraryName>/',
+        views.get_all_rooms_for_library),
+    path(
+        'getAllStudents/',
+        views.get_all_students),
 ]
