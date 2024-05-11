@@ -13,6 +13,7 @@ import random
 
 # Create your views here.
 
+
 @api_view(['POST'])
 def create_library(request):
     """
@@ -31,12 +32,13 @@ def create_library(request):
 
     return Response()
 
+
 @api_view(['POST'])
 def create_room(request):
     """
     Requires roomId, libraryName, roomType, minCapacity, maxCapacity
     noiseLevel, openHour, openMinute, closeHour, closeMinute
-    in request body 
+    in request body
     """
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
@@ -62,6 +64,7 @@ def create_room(request):
 
     return Response()
 
+
 @api_view(['POST'])
 def register_student(request):
     """
@@ -80,6 +83,7 @@ def register_student(request):
     )
 
     return Response()
+
 
 @api_view(['POST'])
 def login_student(request):
@@ -102,17 +106,18 @@ def login_student(request):
     request.session['studentId'] = student.studentId
     return Response()
 
+
 @api_view(['POST'])
 def logout_student(request):
     if 'studentId' in request.session:
         del request.session['studentId']
     return Response()
 
+
 @api_view(['POST'])
 def create_reservation(request):
-  
     """
-    Requires studentId, roomId, date, 
+    Requires studentId, roomId, date,
     startHour, endHour, startMinute, endMinute
     in request body
     """
@@ -138,33 +143,37 @@ def create_reservation(request):
     startTime = time(content["startHour"], content["startMinute"])
     endTime = time(content["endHour"], content["endMinute"])
     if date_dt < date.today() or \
-        date_dt == date.today and startTime < datetime.now().time():
+            date_dt == date.today and startTime < datetime.now().time():
         raise ValueError("Requested date is already past")
-    
+
      # Use available_times to check the availability
-    available_slots = get_available_times(content['roomId'], date_dt.strftime('%Y-%m-%d'))
-    is_time_available = any(startTime >= slot[0] and endTime <= slot[1] for slot in available_slots)
+    available_slots = get_available_times(
+        content['roomId'], date_dt.strftime('%Y-%m-%d'))
+    is_time_available = any(
+        startTime >= slot[0] and endTime <= slot[1] for slot in available_slots)
 
     if not is_time_available:
-        return Response({"error": "No available slots for the requested time range"}, status=400)
+        return Response(
+            {"error": "No available slots for the requested time range"}, status=400)
 
     # Create reservation if the time slot is available
     models.Reservations.objects.create(
         studentId=student,
         roomId=room,
         date=date_dt,
- 	    startTime=startTime,
+        startTime=startTime,
         endTime=endTime
-    )    
+    )
 
     return Response()
+
 
 @api_view(['DELETE'])
 def delete_reservation(request):
     # TODO: rewrite this completely
     """
     Requires date, startHour, endHour, startMinute, endMinute, and studentId
-    in request body 
+    in request body
     """
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
@@ -176,7 +185,7 @@ def delete_reservation(request):
         print(f'{student}')
     except models.Student.DoesNotExist as ex:
         raise ex
-    
+
     year, month, day = [int(x) for x in content['date'].split('-')]
     date_dt = date(year, month, day)
     startTime = time(content["startHour"], content["startMinute"])
@@ -187,7 +196,7 @@ def delete_reservation(request):
         date=date_dt,
         startTime=startTime,
         endTime=endTime))
-    
+
     if len(reservations) != 1:
         raise ValueError("Section does not exist")
 
@@ -219,11 +228,12 @@ def delete_reservation(request):
     if len(right_reservations) == 1:
         reservations[0].endTime = right_reservations[0].endTime
         right_reservations[0].delete()
-    
+
     reservations[0].studentId = None
     reservations[0].save()
 
     return Response()
+
 
 @api_view(['GET'])
 def check_room_availability(request, roomId):
@@ -231,27 +241,30 @@ def check_room_availability(request, roomId):
     reservations = list(models.Reservations.objects
                         .filter(roomId=roomId, studentId=UNAVAILABLE)
                         .values('date', 'startTime', 'endTime'))
-    
+
     resp = {'availableTimes': reservations}
     return Response(resp)
+
 
 @api_view(['GET'])
 def get_all_rooms(request):
     rooms = models.Room.objects.all().values()
     return Response(rooms)
 
+
 @api_view(['GET'])
 def get_available_rooms(request, start_time, end_time):
     """
     returns a QuerySet of rooms that are not booked within
     a specified start and end time
-    
+
     !date must be formatted as year-month-day
     """
-    start_time = datetime.strptime(start_time_str, "%H:%M").time()
-    end_time = datetime.strptime(end_time_str, "%H:%M").time()
+    start_time = datetime.strptime(start_time, "%H:%M").time()
+    end_time = datetime.strptime(end_time, "%H:%M").time()
 
-    year, month, day = [int(x) for x in content['date'].split('-')]
+    # TODO: Date should be passed in URL (broken)
+    # year, month, day = [int(x) for x in content['date'].split('-')]
     rsrvDate = date(year, month, day)
 
     """
@@ -261,10 +274,10 @@ def get_available_rooms(request, start_time, end_time):
       the reservations starts before start_time and ends after end_time
     """
     unavailable = models.Reservations.objects.filter(
-        Q(  Q(startTime__gte = start_time, startTime__lte = end_time) 
-            | Q(endTime__gte = start_time, endTime__lte = end_time)
-            | Q(startTime__lte = start_time, endTime__gte = end_time)
-        ),
+        Q(Q(startTime__gte=start_time, startTime__lte=end_time)
+            | Q(endTime__gte=start_time, endTime__lte=end_time)
+            | Q(startTime__lte=start_time, endTime__gte=end_time)
+          ),
         date=rsrvDate
     ).values_list('roomId', flat=True)
 
@@ -272,20 +285,21 @@ def get_available_rooms(request, start_time, end_time):
 
     return Response(available)
 
+
 @api_view(['GET'])
 def get_reservations_for_student_in_time_range(request, start_time, end_time):
     if 'studentId' not in request.session:
         raise ValueError("Not logged in")
-    # TODO rewrite this
-    dt_start=dt_end=None
+    # TODO rewrite this (broken)
+    dt_start = dt_end = None
     try:
-        dt_start=datetime.strptime(start_time,"%Y-%m-%dT%H:%M:%S")
-        dt_end=datetime.strptime(end_time,"%Y-%m-%dT%H:%M:%S")
-    except:
+        dt_start = datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%S")
+        dt_end = datetime.strptime(end_time, "%Y-%m-%dT%H:%M:%S")
+    except BaseException:
         raise ValueError("Invalid datetime format")
-    if dt_start>=dt_end:
+    if dt_start >= dt_end:
         raise ValueError("Start date & time must come before end date & time")
-    res=models.Reservations.objects.filter(
+    res = models.Reservations.objects.filter(
         studentId=request.session['studentId'],
         date__gte=dt_start,
         date__lte=dt_end,
@@ -294,21 +308,25 @@ def get_reservations_for_student_in_time_range(request, start_time, end_time):
     ).values()
     return Response(res)
 
+
 @api_view(['GET'])
 def get_all_reservations_for_a_student(request):
     if 'studentId' not in request.session:
         raise ValueError("Not logged in")
-    reservations = models.Reservations.objects.filter(studentId=request.session['studentId']).values()
+    reservations = models.Reservations.objects.filter(
+        studentId=request.session['studentId']).values()
     return Response(reservations)
+
 
 @api_view(['GET'])
 def get_all_reservations(request):
     res = models.Reservations.objects.all().values()
     return Response(res)
 
+
 @api_view(['GET'])
 def get_reservations_in_time_range(request):
-    # TODO rewrite this
+    # TODO rewrite this (broken)
     """
     Requires start_time, end_time in request body
     """
@@ -317,15 +335,15 @@ def get_reservations_in_time_range(request):
     content = body['content']
     print(f'{content=}')
 
-    dt_start=dt_end=None
+    dt_start = dt_end = None
     try:
-        dt_start=datetime.strptime(start_time,"%Y-%m-%dT%H:%M:%S")
-        dt_end=datetime.strptime(end_time,"%Y-%m-%dT%H:%M:%S")
-    except:
+        dt_start = datetime.strptime(start_time, "%Y-%m-%dT%H:%M:%S")
+        dt_end = datetime.strptime(end_time, "%Y-%m-%dT%H:%M:%S")
+    except BaseException:
         raise ValueError("Invalid datetime format")
-    if dt_start>=dt_end:
+    if dt_start >= dt_end:
         raise ValueError("Start date & time must come before end date & time")
-    res=models.Reservations.objects.filter(
+    res = models.Reservations.objects.filter(
         studentId__isnull=False,
         date__gte=dt_start,
         date__lte=dt_end,
@@ -333,6 +351,7 @@ def get_reservations_in_time_range(request):
         endTime__lte=dt_end,
     ).values()
     return Response(res)
+
 
 @api_view(['GET'])
 def available_times(request, roomId, date_str):
@@ -347,12 +366,13 @@ def available_times(request, roomId, date_str):
     except ValueError as e:
         return Response({'error': str(e)}, status=400)
 
+
 @api_view(['DELETE'])
 def clear_expired_time_slots(request):
-    dtobj=datetime.now()
-    today=dtobj.date()
-    rightnow=dtobj.time()
-    expiredres=models.Reservations.objects.filter(
+    dtobj = datetime.now()
+    today = dtobj.date()
+    rightnow = dtobj.time()
+    expiredres = models.Reservations.objects.filter(
         date__lte=today,
         endTime__lte=rightnow,
     )
@@ -360,26 +380,28 @@ def clear_expired_time_slots(request):
         return Response({'message':'No expired time slots to clear'})
     for res in expiredres:
         res.delete()
-    return Response({'message':'Expired time slots have been cleared'})
+    return Response({'message': 'Expired time slots have been cleared'})
+
 
 @api_view(['GET'])
 def get_all_libraries(request):
-    libs=models.Library.objects.all().values()
+    libs = models.Library.objects.all().values()
     return Response(libs)
 
 
 @api_view(['GET'])
-def get_all_rooms_for_library(request,libraryName):
-    match=models.Room.objects.filter(libraryName=libraryName).values()
+def get_all_rooms_for_library(request, libraryName):
+    match = models.Room.objects.filter(libraryName=libraryName).values()
     return Response(match)
 
 
 @api_view(['GET'])
 def get_all_students(request):
-    students=models.Student.objects.all().values()
+    students = models.Student.objects.all().values()
     return Response(students)
 
-def get_available_times(room_id, date_str): 
+
+def get_available_times(room_id, date_str):
     """
     returns the times that a room is available
     """
