@@ -376,6 +376,8 @@ def clear_expired_time_slots(request):
         date__lte=today,
         endTime__lte=rightnow,
     )
+    if len(expiredres)==0:
+        return Response({'message':'No expired time slots to clear'})
     for res in expiredres:
         res.delete()
     return Response({'message': 'Expired time slots have been cleared'})
